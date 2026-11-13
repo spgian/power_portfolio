@@ -5,7 +5,7 @@ This repository contains a Python model of a power portfolio.
 It represents one wind farm producing electricity, 
 one solar PV farm producing electricity and obligations to supply electricity to customers.
 Read README.md when project background is needed, or run instructions are needed.
-Do not assume that you have access to earlier course conversations.
+Do not assume that you have access to earlier conversations.
 
 ## Preserve the model conventions
 - Generation and consumption are total MWh for the same half-hour period.

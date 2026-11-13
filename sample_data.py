@@ -1,5 +1,4 @@
-"""Lecture 4.2: Generate illustrative inputs for an ordinary 48-period day.
-"""
+"""Generate illustrative inputs for an ordinary 48-period day."""
 
 from random import Random
 
