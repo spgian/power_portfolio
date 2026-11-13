@@ -13,7 +13,7 @@ unrelated experimental outputs.
 ## Fork contribution workflow
 
 In your local clone, origin should identify your fork and upstream
-should identify the original course repository.
+should identify the original project repository.
 
 Start from a clean main branch and retrieve the original project's updates:
 

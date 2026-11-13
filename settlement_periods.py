@@ -1,5 +1,4 @@
-"""Lecture 5.1: Times and labels
-"""
+"""Calculate settlement-period times and labels."""
 
 from datetime import date, datetime, time, timedelta
 

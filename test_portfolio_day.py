@@ -1,4 +1,4 @@
-"""Lecture 3.2: Check the dated collection and its input-sequence rules."""
+"""Test portfolio-day calculations and input validation."""
 
 from datetime import date
 import pytest

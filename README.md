@@ -1,35 +1,37 @@
-# Power Portfolio Positions and Cash Flows
+# Power Portfolio Analytics
 
-**A Python model linking electricity quantities to wholesale market cash flows.**
+**Positions, wholesale cash flows and scenario comparison in Python.**
 
 Developed by **Dr. Spyros Giannelos**.
 
-The example company owns one wind farm and one solar PV farm. It also has an obligation to supply electricity to its customers. We analyse these components together as one power portfolio.
+Power Portfolio Analytics is a Python application for analysing the combined electricity position of a wind farm, a solar PV farm and an obligation to supply electricity to customers. The model calculates period-level generation, consumption, surpluses, shortages, wholesale purchases and sales, and the associated signed market cash flows.
 
-We focus on the electricity market of Great Britain, where every day consists of 48 settlement periods. For each half-hour settlement period, the model compares the total electricity generation with the company's customer electricity consumption. It calculates the electricity surplus or shortage for the company, the purchase or sale of electricity required under the model's assumptions, and the associated wholesale electricity market cash flow.
+The application analyses one illustrative delivery date with **48 half-hour settlement periods**. It also supports CSV-based scenarios, visualisation, a command-line interface and automated tests. It is a portfolio position and wholesale cash-flow model, **not a live trading system or a complete company-profit model**.
 
-**This is a position-and-cash-flow model. It is not a live trading system or a complete company-profit model.**
+## Project Applications
 
-## Why this project is useful
+The application provides a foundation for electricity portfolio analysis, energy supply management and quantitative trading support. It links physical electricity quantities to wholesale market transactions and financial outcomes.
 
-The project provides a foundation for power-portfolio analysis, trading support and electricity-supply analysis. It connects generation and consumption data to commercial quantities and monetary results. It also demonstrates a reusable Python calculation, file-based inputs, numerical and visual outputs, automated checks, and Git version history.
+The project demonstrates Python-based numerical modelling, structured data processing, scenario comparison, visualisation, command-line application development, automated testing and Git-based collaboration.
 
-## What the completed application does
+## Main Features
 
-- Reads one  day's input data from CSV and checks coverage of periods 1 to 48.
-- Calculates each period's generation, net position, purchase or sale, and wholesale market cash flow.
-- Reports totals and volume-weighted purchase and sale prices.
-- Exports a period-results CSV and four separate PNG charts.
-- Includes controlled zero-price, negative-price and daily price-sensitivity examples in `price_examples.py`.
-- Retains 24 automated test functions in the supplied reference implementation.
+- **Portfolio modelling:** Analyse wind generation, solar PV generation and customer electricity consumption across 48 half-hour settlement periods.
+- **Energy positions:** Calculate the portfolio's surplus (LONG), shortage (SHORT) or balanced position before wholesale transactions.
+- **Wholesale market transactions:** Calculate required electricity purchases and sales for each period.
+- **Cash-flow analysis:** Calculate purchase costs, sale revenues, net market cash flows, daily totals and volume-weighted purchase and sale prices.
+- **Scenario comparison:** Compare two input datasets for the same delivery date and report scenario-minus-baseline differences.
+- **CSV workflows:** Read validated input data and export period results and scenario comparisons.
+- **Visualisation:** Produce four PNG charts of generation and demand, portfolio positions, wholesale prices and market cash flows.
+- **Automated checks:** Use pytest to verify calculations, time labels, input rules, reporting and selected output files.
 
-## Model conventions
+## Model Conventions
 
-All generation and consumption inputs are **energy quantities in MWh for one half-hour**. They are not instantaneous power values in MW. Do not multiply an input MWh quantity by 0.5 hours again.
+All generation and customer-consumption inputs are **energy quantities in MWh over a half-hour settlement period**, not instantaneous power values in MW. They must **not** be multiplied by 0.5 hours again.
 
-For each settlement period:
+For each settlement period, the model uses the following relationships:
 
-```text
+```python
 total_generation_mwh = wind_mwh + solar_mwh
 net_position_mwh = total_generation_mwh - demand_mwh
 purchase_mwh = max(-net_position_mwh, 0)
@@ -39,161 +41,235 @@ sale_revenue_gbp = sale_mwh * price_gbp_per_mwh
 net_market_cash_flow_gbp = sale_revenue_gbp - purchase_cost_gbp
 ```
 
-The `max` expressions above summarise the existing `if`/`elif`/`else` implementation; they are not a proposed code change.
+These expressions summarise the calculation rules. The implementation uses an `if` / `elif` / `else` structure to classify positions.
 
-A positive net position is **long** and a negative position is **short**, measured before the model's wholesale transaction. Purchase and sale quantities are non-negative. The price, purchase-cost value, sale-revenue value and signed cash flow can be negative.
+A **positive** pre-trade net position is LONG, a **negative** position is SHORT, and zero is BALANCED. Purchases and sales are non-negative energy quantities. Wholesale prices may be negative, so the monetary cost, revenue and cash-flow values may also be negative.
 
-The same assumed wholesale price applies to purchases and sales within a period. The full shortage is purchased or the full surplus is sold, without trading fees. There is no price-responsive change in generation or customer consumption.
+Each period is calculated independently before results are aggregated. An electricity surplus in one period does not offset a shortage in another period because this model contains no storage or inter-period energy transfer.
 
-Calculate transactions separately for each period, then sum the results. Surpluses in later periods do not remove earlier shortages because this version contains no storage.
+## Input Dataset
 
-## Requirements and running the project
+The supplied reference dataset is **illustrative**, generated from a reproducible example with random seed `42`. It is not based on measured company generation, customer demand or observed market prices. Its delivery date labels the sample and does not drive a historical weather or seasonal simulation.
 
-The lessons use PyCharm on a Mac, but the code does not depend on PyCharm. 
+The default input file is:
 
-`requirements.txt` records the two direct dependencies already used by the project. It is not a complete cross-platform dependency lockfile. No AI subscription or external data-service account is required.
+```text
+data/portfolio_inputs_2026-09-01.csv
+```
 
-## Input dataset
-
-This is a saved **illustrative** dataset, originally generated with seed 42. It does not contain real company measurements or observed market prices. The date labels the example; it did not determine the generator's weather or seasonal profiles. All prices in this reference dataset are positive.
-
-Keep these six CSV columns in the stated order:
+The CSV contains the following columns, in this order:
 
 | Column | Meaning |
 |---|---|
-| `delivery_date` | Delivery date, for example `2026-09-01`. All records must share one date. |
-| `settlement_period` | Integer identifier from 1 to 48 for this ordinary-day report. |
-| `wind_mwh` | Wind-farm generation during that half-hour. |
-| `solar_mwh` | Solar PV generation during that half-hour. |
-| `demand_mwh` | Combined customer consumption during that half-hour. |
-| `price_gbp_per_mwh` | Assumed wholesale price in pounds per MWh. |
+| `delivery_date` | Delivery date in `YYYY-MM-DD` format; all records must share one date. |
+| `settlement_period` | Integer settlement-period number from 1 to 48. |
+| `wind_mwh` | Wind-farm energy generated during the period, in MWh. |
+| `solar_mwh` | Solar PV energy generated during the period, in MWh. |
+| `demand_mwh` | Customer electricity consumption during the period, in MWh. |
+| `price_gbp_per_mwh` | Assumed wholesale electricity price, in GBP/MWh. |
 
-The loader rejects unusable numbers, non-finite values and negative energy inputs. Negative prices remain valid. `PortfolioDay` checks the period identifiers, while `main.py` requires the complete ordered 48-period sequence for its report.
+The file loader validates the column names and numeric values. It rejects non-finite values, negative energy quantities and inconsistent delivery dates, but it allows negative wholesale prices. The full-day reporting application requires settlement periods **1 through 48**, once each and in increasing order.
 
-`main.py` reads this file. It does not regenerate or overwrite it. Changing `sample_data.py` alone will therefore not change the CSV-backed report.
+The reference dataset contains 48 data records plus a header row. The main application reads the saved CSV without regenerating or overwriting its input data.
 
-## Reference results
+## Requirements and Installation
 
-These results correspond to the unchanged saved reference input file. Values below are rounded for display.
+The application can be run from a terminal or through a Python IDE such as PyCharm. Its packages are listed in `requirements.txt`, including Matplotlib for plotting and pytest for automated tests.
 
-| Metric | Reference value |
-|---|---:|
-| Wind generation | 499.81 MWh |
-| Solar PV generation | 72.00 MWh |
-| Combined generation | 571.81 MWh |
-| Customer consumption | 554.67 MWh |
-| Sum of pre-trade positions | +17.14 MWh |
-| Purchases | 62.67 MWh |
-| Sales | 79.81 MWh |
-| Wholesale purchase cost | £6,085.54 |
-| Wholesale sale revenue | £5,648.26 |
-| Net wholesale market cash flow | **-£437.28** |
-| Long / short / balanced periods | 29 / 19 / 0 |
-| Volume-weighted purchase price | £97.10/MWh |
-| Volume-weighted sale price | £70.77/MWh |
+Clone the repository:
 
-Although more MWh are sold than purchased, the volume-weighted purchase price is higher. For these quantities and prices, purchase cost exceeds sale revenue. The net result is a wholesale cash outflow, not a complete company loss.
-
-The largest electricity shortage occurs in period 38: 6.89 MWh. The largest cash outflow instead occurs in period 37: approximately £738.03, because its price is higher. Both quantity and price matter.
-
-## File structure
-
-```text
-power_portfolio/
-    main.py                       # CSV-backed report, export and plotting
-    portfolio_calculations.py     # Period calculations and aggregate totals
-    portfolio_day.py              # Dated collection and period checks
-    portfolio_io.py               # Input saving, loading and result export
-    portfolio_plots.py            # Four separate charts
-    settlement_periods.py         # Ordinary-day times and labels
-    sample_data.py                # Reproducible illustrative input generator
-    price_examples.py             # Controlled price and sensitivity examples
-    test_main.py
-    test_portfolio_day.py
-    test_settlement_periods.py
-    requirements.txt
-    README.md
-    data/                         # Reference input CSV
-    outputs/                      # Reference results CSV and four PNGs
-    docs/
-        course_summary.pptx    # slides with speaker notes
+```bash
+git clone https://github.com/spgian/power_portfolio.git
+cd power_portfolio
 ```
 
-## Author
+Create a virtual environment on macOS or Linux, then install the dependencies:
 
-**Dr. Spyros Giannelos**  
-**The Energy Data Scientist**
+```bash
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+```
 
+In PyCharm, select the interpreter located at `power_portfolio/.venv/bin/python`. A virtual environment keeps the project's installed packages separate from those of other Python projects.
 
-## Collaboration workflow
+No paid AI subscription or external electricity market data-service account is required to run the supplied examples.
 
-Review incoming changes before integrating them into your local branch.
-Keep reference inputs and financial formulas unchanged unless the task requires it.
+## Running the Portfolio Analysis
 
-## Command-line interface
+From the repository root, run the application with its default CSV and output folder:
 
-Run these commands from the project root using the existing Python environment.
-
-Use the default input file and output folder:
-
-```sh
+```bash
 ./.venv/bin/python main.py
 ```
 
-Select an existing input CSV and a folder for the results CSV and four PNG charts:
+To select an existing input file and a different output directory:
 
-```sh
-./.venv/bin/python main.py --input data/portfolio_inputs_2026-09-01.csv --output-dir results
+```bash
+./.venv/bin/python main.py \
+  --input data/portfolio_inputs_2026-09-01.csv \
+  --output-dir results
 ```
 
-Both options are optional and can be used independently. Omitting `--input` uses
-`data/portfolio_inputs_2026-09-01.csv`; omitting `--output-dir` uses `outputs/`.
-These defaults are relative to the folder containing `main.py`. Paths supplied
-on the command line are relative to the terminal's current working directory,
-unless they are absolute paths. Quote paths containing spaces. A missing output
-folder is created when results are saved.
+Both `--input` and `--output-dir` are optional. With no options, the application reads `data/portfolio_inputs_2026-09-01.csv` and writes its results to `outputs/`, with those default paths resolved relative to `main.py`. Explicit command-line paths are resolved relative to the terminal's working directory unless absolute paths are supplied.
 
-If an explicitly selected input is missing or is a directory, the command reports
-`Input CSV is not an existing file: <path>` on stderr and exits with status 2
-before running the model or creating results. It does not use the default dataset
-instead. Existing CSV content validation still applies.
+View the available options without running the calculations or creating output files:
 
-Display usage instructions without running the model or creating results:
-
-```sh
+```bash
 ./.venv/bin/python main.py --help
 ```
 
-`-h` also displays help. Help exits with status 0. The existing programmatic
-`main(input_csv=..., output_directory=...)` interface and financial calculations
-remain unchanged.
+The report prints the 48 settlement periods, their energy positions and monetary results, daily totals, counts of LONG/SHORT/BALANCED periods, and volume-weighted purchase and sale prices.
 
-## Scenario comparison
+## Scenario Comparison
 
-`compare_scenarios.py` compares two input CSVs for the same delivery date: a
-baseline and an alternative scenario. It uses the existing calculations to obtain
-the ten daily totals for each file, then reports each difference as
-**scenario minus baseline**. It prints a table (values to two decimals) and saves
-one comparison CSV with unrounded values. It does not create charts.
+The separate `compare_scenarios.py` application compares two input CSV files: a **baseline** and an **alternative scenario**.
 
-```sh
+Both files must describe the same delivery date and contain the complete, ordered 48-period sequence. The comparison reuses the existing portfolio calculation functions rather than implementing a second financial model.
+
+Run the supplied higher-demand comparison:
+
+```bash
 ./.venv/bin/python compare_scenarios.py \
   --baseline data/portfolio_inputs_2026-09-01.csv \
   --scenario data/portfolio_inputs_more_demand.csv \
   --output outputs/scenario_comparison.csv
 ```
 
-- `--baseline` and `--scenario` are required and must be existing input CSVs.
-- `--output` is optional. Give the full CSV filename, including its folder. The
-  default is `outputs/scenario_comparison.csv` relative to `compare_scenarios.py`.
-  A missing folder is created. The output must not be one of the input files.
+The program displays daily totals for both cases and calculates every difference as:
 
-Both files must have the same delivery date and settlement periods 1 to 48, in
-increasing order, each appearing once. Otherwise the script reports an error and
-stops without writing the comparison CSV.
+```text
+difference = scenario total - baseline total
+```
 
-Display usage instructions without running the comparison:
+It also saves a comparison CSV with unrounded numerical values. It does not create additional charts. The `--baseline` and `--scenario` arguments are required; `--output` is optional.
 
-```sh
+Display the command-line help:
+
+```bash
 ./.venv/bin/python compare_scenarios.py --help
 ```
+
+## Reference Results
+
+The results below are for the **unchanged saved illustrative reference dataset**. Values are rounded for display.
+
+| Metric | Reference result |
+|---|---:|
+| Wind generation | 499.81 MWh |
+| Solar PV generation | 72.00 MWh |
+| Total generation | 571.81 MWh |
+| Customer consumption | 554.67 MWh |
+| Sum of pre-trade net positions | +17.14 MWh |
+| Total purchases | 62.67 MWh |
+| Total sales | 79.81 MWh |
+| Wholesale purchase cost | £6,085.54 |
+| Wholesale sale revenue | £5,648.26 |
+| **Net wholesale market cash flow** | **−£437.28** |
+| LONG / SHORT / BALANCED periods | 29 / 19 / 0 |
+| Volume-weighted purchase price | £97.10/MWh |
+| Volume-weighted sale price | £70.77/MWh |
+
+Although more MWh are sold than purchased, the volume-weighted purchase price exceeds the sale price. Consequently, total purchase cost exceeds total sale revenue. The resulting **−£437.28 is a net wholesale market cash outflow**, not the company's overall loss.
+
+For the supplied higher-demand scenario, the reference comparison is:
+
+| Metric | Amount |
+|---|---:|
+| Baseline net market cash flow | −£437.28 |
+| Higher-demand scenario net market cash flow | −£492.78 |
+| **Scenario minus baseline** | **−£55.50** |
+
+These figures are reference results for the supplied example files, not target values for arbitrary inputs.
+
+## Outputs and Charts
+
+For an input file named `portfolio_inputs_2026-09-01.csv`, the main application saves the following files to the chosen output directory:
+
+| File | Contents |
+|---|---|
+| `portfolio_inputs_2026-09-01_results.csv` | Period-by-period calculated positions, transactions and cash flows. |
+| `portfolio_inputs_2026-09-01_generation_demand.png` | Wind, solar PV, combined generation and customer demand. |
+| `portfolio_inputs_2026-09-01_positions.png` | Signed pre-trade electricity positions. |
+| `portfolio_inputs_2026-09-01_prices.png` | Assumed wholesale electricity prices. |
+| `portfolio_inputs_2026-09-01_cash_flows.png` | Signed net wholesale market cash flow by period. |
+
+The program creates a missing output directory as needed. Its four charts show energy or financial outcomes for the **half-hour periods**, with appropriate units. Negative prices and negative cash flows remain visible.
+
+## Price Sensitivity Examples
+
+The `price_examples.py` module provides controlled demonstrations of zero and negative wholesale prices, and a daily sensitivity analysis that applies constant price shifts to the same illustrative electricity quantities.
+
+Run it with:
+
+```bash
+./.venv/bin/python price_examples.py
+```
+
+The sensitivity cases use shifts of **−20, 0 and +20 GBP/MWh** relative to the original assumed prices. These are absolute price shifts, not percentage changes; the generation and demand quantities remain unchanged.
+
+## Automated Tests
+
+The project includes automated tests covering period-level financial calculations, input validation, settlement-period timing, reproducible sample data, command-line arguments, reporting and selected output files.
+
+Run the test suite from the repository root:
+
+```bash
+./.venv/bin/python -m pytest -q
+```
+
+Tests that write example CSV files or charts use temporary directories where appropriate. The tests are designed to check the model's intended numerical and operational behaviour without modifying the saved reference input dataset.
+
+## Repository Structure
+
+```text
+power_portfolio/
+├── main.py                       # Full-day report, exports and charts
+├── compare_scenarios.py          # Baseline and alternative scenario comparison
+├── portfolio_calculations.py     # Per-period calculations and totals
+├── portfolio_day.py              # Dated portfolio inputs and validation
+├── portfolio_io.py               # Input and results CSV functions
+├── portfolio_plots.py            # Generation, position, price and cash-flow charts
+├── settlement_periods.py         # Half-hour timing and labels
+├── sample_data.py                # Illustrative input-data generator
+├── price_examples.py             # Price examples and sensitivity analysis
+├── test_main.py
+├── test_portfolio_day.py
+├── test_settlement_periods.py
+├── requirements.txt
+├── README.md
+├── CONTRIBUTING.md
+├── AGENTS.md
+├── CLAUDE.md
+├── data/                         # Saved illustrative input CSV files
+├── outputs/                      # Reference results and PNG charts
+└── docs/                         # Supporting project documentation
+```
+
+## Project Presentation
+
+A short project overview is intended to be provided in two formats:
+
+- [Project overview (PDF)](docs/power_portfolio_overview.pdf)
+- [Editable presentation (PowerPoint)](docs/power_portfolio_overview.pptx)
+
+**These links will work once the corresponding files have been added to `docs/` and committed to the repository.**
+
+## Scope and Limitations
+
+- The sample data and prices are **illustrative**, not observed market or operational records.
+- The model assumes an **ordinary 48-period delivery day**. It does not implement special settlement-period handling for daylight-saving clock changes.
+- Each period uses one assumed wholesale price for both purchases and sales.
+- The model assumes that every surplus is sold and every shortage is purchased at that price, without trading fees.
+- Generation and customer consumption are fixed inputs. They do not respond to wholesale prices.
+- The model does not optimise dispatch, include battery storage or represent electricity transmission constraints.
+- Wholesale market cash flow excludes other revenues, customer tariffs, operating costs, imbalance arrangements and taxes. It must not be interpreted as complete company profit.
+- The application does not connect to an exchange, place orders or execute trades.
+
+## Contributing
+
+Guidelines for proposing changes are available in [CONTRIBUTING.md](CONTRIBUTING.md). Contributions can be developed on a separate branch and proposed through a pull request. Changes should preserve the documented financial conventions unless a deliberate model extension is being implemented.
+
+## Author
+
+**Dr. Spyros Giannelos**
+**The Energy Data Scientist**

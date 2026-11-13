@@ -1,4 +1,4 @@
-"""Lecture 7.1"""
+"""Generate charts for electricity generation, positions, prices and cash flows."""
 
 from datetime import date
 from pathlib import Path

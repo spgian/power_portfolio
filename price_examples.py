@@ -1,5 +1,4 @@
-"""Lectures 5.1 and 5.2:  price examples and daily price sensitivity.
-"""
+"""Demonstrate price scenarios and daily cash-flow sensitivity."""
 
 from datetime import date
 from math import isfinite

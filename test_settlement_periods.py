@@ -1,4 +1,4 @@
-"""Lecture 5.1"""
+"""Test settlement-period timing and full-day reporting."""
 
 from datetime import date, datetime, timedelta
 from pathlib import Path

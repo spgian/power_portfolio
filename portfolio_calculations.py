@@ -1,4 +1,4 @@
-"""Portfolio calculations moved unchanged from Lecture 3.1."""
+"""Calculate portfolio positions, wholesale trades and cash flows."""
 
 
 def calculate_portfolio_period(
@@ -28,7 +28,7 @@ def calculate_portfolio_period(
         purchase_mwh = 0.0
         sale_mwh = 0.0
 
-    # Preserve the cash-flow formulas from Lecture 2.3.
+    # Calculate purchase costs, sale revenues and signed market cash flows.
     # At negative prices, purchase cost or sale revenue can be negative.
     purchase_cost_gbp = purchase_mwh * price_gbp_per_mwh
     sale_revenue_gbp = sale_mwh * price_gbp_per_mwh

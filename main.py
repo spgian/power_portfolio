@@ -1,4 +1,4 @@
-"""Lecture 6.3"""
+"""Run portfolio analysis and export results and charts."""
 
 import argparse
 from pathlib import Path

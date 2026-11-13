@@ -1,4 +1,4 @@
-"""Lecture 6.3"""
+"""Read and write portfolio input and results CSV files."""
 
 import csv
 from datetime import date
